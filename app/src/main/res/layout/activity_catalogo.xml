@@ -54,7 +54,7 @@
 
         <View
             android:id="@+id/series_line_catalog"
-            android:layout_width="300dp"
+            android:layout_width="280dp"
             android:layout_height="2dp"
             android:background="@color/yellow"
             android:layout_marginHorizontal="15dp"

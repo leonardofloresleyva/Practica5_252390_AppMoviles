@@ -1,5 +1,7 @@
 package mx.itson.edu.practica5
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.RadioGroup
@@ -11,23 +13,18 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class SeatSelectionActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_seat_selection)
 
         val title: TextView = findViewById(R.id.titleSeats)
-        var posMovie = -1
+        var selectedSeat = -1
 
         val bundle = intent.extras
         if(bundle!=null){
             title.text = bundle.getString("name")
-            posMovie = bundle.getInt("id")
-        }
-
-        val confirm: Button = findViewById(R.id.confirm_button)
-        confirm.setOnClickListener {
-            Toast.makeText(this, "Enjoy the movie :D", Toast.LENGTH_LONG).show()
         }
 
         val row1: RadioGroup = findViewById(R.id.row1)
@@ -42,6 +39,7 @@ class SeatSelectionActivity : AppCompatActivity() {
                 row4.clearCheck()
 
                 row1.check(checkedId)
+                selectedSeat = checkedId
             }
         }
 
@@ -52,6 +50,7 @@ class SeatSelectionActivity : AppCompatActivity() {
                 row4.clearCheck()
 
                 row2.check(checkedId)
+                selectedSeat = checkedId + 5
             }
         }
 
@@ -62,6 +61,7 @@ class SeatSelectionActivity : AppCompatActivity() {
                 row4.clearCheck()
 
                 row3.check(checkedId)
+                selectedSeat = checkedId + 10
             }
         }
 
@@ -72,7 +72,19 @@ class SeatSelectionActivity : AppCompatActivity() {
                 row1.clearCheck()
 
                 row4.check(checkedId)
+                selectedSeat = checkedId + 15
             }
+        }
+
+        val confirm: Button = findViewById(R.id.confirm_button)
+        confirm.setOnClickListener {
+              if(selectedSeat > -1){
+                  Toast.makeText(this, "Enjoy the movie :D", Toast.LENGTH_LONG).show()
+                  setResult(Activity.RESULT_OK, Intent().putExtra("selectedSeat", selectedSeat))
+                  finish()
+              } else {
+                  Toast.makeText(this, "You haven't selected any seat :(", Toast.LENGTH_LONG).show()
+              }
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.seat_selection)) { v, insets ->

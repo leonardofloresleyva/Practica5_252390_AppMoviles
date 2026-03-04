@@ -1,5 +1,7 @@
 package mx.itson.edu.practica5
 
+import android.app.Activity
+import android.app.ComponentCaller
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -10,7 +12,10 @@ import android.widget.BaseAdapter
 import android.widget.GridView
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -19,19 +24,45 @@ class CatalogoActivity : AppCompatActivity() {
 
     var adapter: PeliculaAdapter? = null
     var seriesAdapter: PeliculaAdapter? = null
-    var peliculas = ArrayList<Pelicula>()
-    var series = ArrayList<Pelicula>()
+    companion object {
+        var peliculas = ArrayList<Pelicula>()
+        var series = ArrayList<Pelicula>()
+        var first = true
+    }
+
+    var movieLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+            result ->
+        if(result.resultCode == Activity.RESULT_OK){
+            var data = result.data
+            if(data != null){
+                var tipo = data.getStringExtra("tipo")
+                if(tipo != null){
+                    var seats = data.getIntExtra("seats", -1)
+                    var id = data.getIntExtra("id", -1)
+                    if(seats > -1 && id > -1){
+                        var contenido = ArrayList<Cliente>()
+                        contenido = if(tipo == "PELICULA") peliculas[id].seats else series[id].seats
+                        for(i in 0 until seats)
+                            contenido.add(Cliente("Cliente", "Tarjeta", i))
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_catalogo)
 
-        cargarPeliculas()
-        cargarSeries()
+        if (first) {
+            cargarPeliculas()
+            cargarSeries()
+            first = false
+        }
 
-        adapter = PeliculaAdapter(this, peliculas)
-        seriesAdapter = PeliculaAdapter(this, series)
+        adapter = PeliculaAdapter(this, peliculas, TipoPelicula.PELICULA, movieLauncher)
+        seriesAdapter = PeliculaAdapter(this, series, TipoPelicula.SERIE, movieLauncher)
         val gridPelis : GridView = findViewById(R.id.movies_catalog)
         val gridSeries : GridView = findViewById(R.id.series_catalog)
 
@@ -44,14 +75,6 @@ class CatalogoActivity : AppCompatActivity() {
             insets
         }
     }
-
-//    override fun onRestart() {
-//        super.onRestart()
-//        val bundle = intent.extras
-//        if(bundle != null){
-//
-//        }
-//    }
 
     fun cargarPeliculas(){
         peliculas.add(Pelicula("Demon Slayer: Kimetsu no Yaiba - To the Hashira Training", R.drawable.demon, R.drawable.demo, "Demon Slayer: Kimetsu no Yaiba -To the Hashira Training- proyectará por primera vez en cines el episodio 11 del Arco de la Aldea de los Herreros, mostrando así la conclusión de la feroz batalla entre Tanjiro y la Cuarta Luna Creciente, Hatengu, además de cómo Nezuko logra caminar bajo el sol. Le seguirá el episodio 1 del Arco del Entrenamiento de los Pilares, donde veremos el inicio del entrenamiento de los Pilares para prepararse de cara a la próxima batalla contra Muzan Kibutsuji, que se podrá ver por primera vez.", arrayListOf<Cliente>()))
@@ -75,9 +98,15 @@ class CatalogoActivity : AppCompatActivity() {
         var context: Context? = null
         var peliculas = ArrayList<Pelicula>()
 
-        constructor(context: Context, peliculas: ArrayList<Pelicula>){
+        var tipoPelicula: TipoPelicula
+
+        var resultLauncher: ActivityResultLauncher<Intent>? = null
+
+        constructor(context: Context, peliculas: ArrayList<Pelicula>, tipoPelicula: TipoPelicula, launcher: ActivityResultLauncher<Intent>){
             this.context = context
             this.peliculas = peliculas
+            this.tipoPelicula = tipoPelicula
+            this.resultLauncher = launcher
         }
 
         override fun getCount() = peliculas.size
@@ -106,12 +135,17 @@ class CatalogoActivity : AppCompatActivity() {
                 intento.putExtra("imagen", pelicula.image)
                 intento.putExtra("header", pelicula.header)
                 intento.putExtra("sinopsis", pelicula.sinopsis)
-                intento.putExtra("numberSeats", (20-pelicula.seats.size))
-                context!!.startActivity(intento)
+                intento.putExtra("numberSeats", (20 - pelicula.seats.size))
+                intento.putExtra("id", (p0))
+                intento.putExtra("tipo", tipoPelicula.name)
+                if(resultLauncher != null)
+                    resultLauncher!!.launch(intento)
+                else
+                    context!!.startActivity(intento)
             }
             return vista
         }
 
     }
-
+    enum class TipoPelicula{ PELICULA, SERIE }
 }
