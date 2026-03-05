@@ -56,6 +56,7 @@ class SeatSelectionActivity : AppCompatActivity() {
                 rows.forEach { otherGroup ->
                     if (otherGroup != group) otherGroup.clearCheck()
                 }
+                group.check(checkedId)
                 val radioButton = group.findViewById<RadioButton>(checkedId)
                 selectedSeat = radioButton.text.toString().toInt()
             }

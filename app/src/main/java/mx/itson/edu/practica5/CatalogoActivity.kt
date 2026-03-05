@@ -45,11 +45,15 @@ class CatalogoActivity : AppCompatActivity() {
                             seats.forEach {
                                 asientos.add(Cliente("Leonardo", "PayPal", it))
                             }
+                            adapter?.notifyDataSetChanged()
+                            seriesAdapter?.notifyDataSetChanged()
                         } else if(tipo == "SERIE"){
                             var asientos = series[id].seats
                             seats.forEach {
                                 asientos.add(Cliente("Leonardo", "PayPal", it))
                             }
+                            adapter?.notifyDataSetChanged()
+                            seriesAdapter?.notifyDataSetChanged()
                         }
                     }
                 }
@@ -135,10 +139,9 @@ class CatalogoActivity : AppCompatActivity() {
 
             image.setImageResource(pelicula.image)
             title.text = pelicula.titulo
-            val asientos = ArrayList<Int>()
-            pelicula.seats.forEach { asientos.add(it.asiento) }
 
             image.setOnClickListener {
+
                 val intento = Intent(context, DetallePeliculaActivity::class.java)
                 intento.putExtra("titulo", pelicula.titulo)
                 intento.putExtra("imagen", pelicula.image)
@@ -147,7 +150,10 @@ class CatalogoActivity : AppCompatActivity() {
                 intento.putExtra("numberSeats", (20 - pelicula.seats.size))
                 intento.putExtra("id", (p0))
                 intento.putExtra("tipo", tipoPelicula.name)
-                intento.putIntegerArrayListExtra("asientos", asientos)
+
+                val asientosActuales = ArrayList<Int>()
+                pelicula.seats.forEach { asientosActuales.add(it.asiento) }
+                intento.putIntegerArrayListExtra("asientos", asientosActuales)
                 if(resultLauncher != null)
                     resultLauncher!!.launch(intento)
                 else

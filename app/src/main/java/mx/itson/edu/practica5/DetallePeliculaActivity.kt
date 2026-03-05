@@ -21,6 +21,9 @@ class DetallePeliculaActivity : AppCompatActivity() {
     var seats = 0
 
     var clients: java.util.ArrayList<Int?>? = ArrayList<Int?>()
+
+    var takenSeats: java.util.ArrayList<Int?>? = ArrayList<Int?>()
+
     var ticketLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result ->
         if(result.resultCode == Activity.RESULT_OK){
@@ -29,6 +32,7 @@ class DetallePeliculaActivity : AppCompatActivity() {
                 var selectedSeat = data.getIntExtra("selectedSeat", -1)
                 if(selectedSeat > 0){
                     clients?.add(selectedSeat)
+                    takenSeats?.add(selectedSeat)
                     seatsAvailable--
                     seats++
                     showSeatsLeft()
@@ -45,6 +49,7 @@ class DetallePeliculaActivity : AppCompatActivity() {
         val peliculaImage: ImageView = findViewById(R.id.image_movie_descrition)
         val nombrePelicula: TextView = findViewById(R.id.movie_title_description)
         val peliculaDesc: TextView = findViewById(R.id.movie_description)
+        takenSeats = ArrayList<Int?>()
 
         val bundle= intent.extras
         if (bundle != null){
@@ -74,7 +79,7 @@ class DetallePeliculaActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if(callback != null && seats > 0){
-                    callback?.putExtra("seats", clients)
+                    callback?.putExtra("seats", takenSeats)
                     setResult(Activity.RESULT_OK, callback)
                 }
                 finish()
