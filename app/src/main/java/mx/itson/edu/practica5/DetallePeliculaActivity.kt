@@ -19,13 +19,16 @@ class DetallePeliculaActivity : AppCompatActivity() {
     var callback: Intent? = null
     var seatsAvailable = 20
     var seats = 0
+
+    var clients: java.util.ArrayList<Int?>? = ArrayList<Int?>()
     var ticketLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result ->
         if(result.resultCode == Activity.RESULT_OK){
             var data = result.data
             if(data != null){
                 var selectedSeat = data.getIntExtra("selectedSeat", -1)
-                if(selectedSeat > -1){
+                if(selectedSeat > 0){
+                    clients?.add(selectedSeat)
                     seatsAvailable--
                     seats++
                     showSeatsLeft()
@@ -49,6 +52,7 @@ class DetallePeliculaActivity : AppCompatActivity() {
             nombrePelicula.text = bundle.getString("titulo")
             peliculaDesc.text = bundle.getString("sinopsis")
             seatsAvailable = bundle.getInt("numberSeats")
+            clients = bundle.getIntegerArrayList("asientos")
             showSeatsLeft()
 
             callback = Intent()
@@ -61,6 +65,7 @@ class DetallePeliculaActivity : AppCompatActivity() {
             if(seatsLeft()){
                 val intent = Intent(this, SeatSelectionActivity::class.java)
                 intent.putExtra("name", bundle?.getString("titulo"))
+                intent.putExtra("asientos", clients)
                 ticketLauncher.launch(intent)
             } else
                 Toast.makeText(this, "All seats were sold!", Toast.LENGTH_LONG).show()
@@ -69,7 +74,7 @@ class DetallePeliculaActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if(callback != null && seats > 0){
-                    callback?.putExtra("seats", seats)
+                    callback?.putExtra("seats", clients)
                     setResult(Activity.RESULT_OK, callback)
                 }
                 finish()

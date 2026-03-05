@@ -37,13 +37,20 @@ class CatalogoActivity : AppCompatActivity() {
             if(data != null){
                 var tipo = data.getStringExtra("tipo")
                 if(tipo != null){
-                    var seats = data.getIntExtra("seats", -1)
+                    var seats = data.getIntegerArrayListExtra("seats")
                     var id = data.getIntExtra("id", -1)
-                    if(seats > -1 && id > -1){
-                        var contenido = ArrayList<Cliente>()
-                        contenido = if(tipo == "PELICULA") peliculas[id].seats else series[id].seats
-                        for(i in 0 until seats)
-                            contenido.add(Cliente("Cliente", "Tarjeta", i))
+                    if(seats != null){
+                        if(tipo == "PELICULA"){
+                            var asientos = peliculas[id].seats
+                            seats.forEach {
+                                asientos.add(Cliente("Leonardo", "PayPal", it))
+                            }
+                        } else if(tipo == "SERIE"){
+                            var asientos = series[id].seats
+                            seats.forEach {
+                                asientos.add(Cliente("Leonardo", "PayPal", it))
+                            }
+                        }
                     }
                 }
             }
@@ -128,6 +135,8 @@ class CatalogoActivity : AppCompatActivity() {
 
             image.setImageResource(pelicula.image)
             title.text = pelicula.titulo
+            val asientos = ArrayList<Int>()
+            pelicula.seats.forEach { asientos.add(it.asiento) }
 
             image.setOnClickListener {
                 val intento = Intent(context, DetallePeliculaActivity::class.java)
@@ -138,6 +147,7 @@ class CatalogoActivity : AppCompatActivity() {
                 intento.putExtra("numberSeats", (20 - pelicula.seats.size))
                 intento.putExtra("id", (p0))
                 intento.putExtra("tipo", tipoPelicula.name)
+                intento.putIntegerArrayListExtra("asientos", asientos)
                 if(resultLauncher != null)
                     resultLauncher!!.launch(intento)
                 else
